@@ -4,13 +4,19 @@
  * Inicializa o sistema de análise gramatical
  */
 function initGrammarAnalysis() {
-    // Evento para atualizar a análise gramatical quando o texto mudar
-    const sourceText = document.getElementById('source-text');
-    sourceText.addEventListener('input', debounce(() => {
-        if (sourceText.value.length > 10) {
-            updateGrammarAnalysis(sourceText.value);
-        }
-    }, 1000));
+    // Análise gramatical será acionada após a tradução pelo botão de tradução
+    // Em vez de usar o evento de input, que analisa o texto original
+    const translateBtn = document.getElementById('translate-btn');
+    translateBtn.addEventListener('click', () => {
+        // A análise será executada após a tradução ser concluída
+        // A função de tradução cuidará de chamar updateGrammarAnalysis
+    });
+    
+    // Também acionamos análise quando o tom é aplicado
+    const applyToneBtn = document.getElementById('apply-tone-btn');
+    applyToneBtn.addEventListener('click', () => {
+        // A aplicação de tom chamará updateGrammarAnalysis quando concluída
+    });
 }
 
 /**
@@ -30,10 +36,19 @@ function debounce(func, wait) {
 
 /**
  * Analisa o texto em busca de padrões gramaticais
+ * Modificado para analisar o texto traduzido
  */
-function updateGrammarAnalysis(text) {
-    // Obter o idioma atual
-    const sourceLang = document.getElementById('source-language').value;
+function updateGrammarAnalysis() {
+    // Obter o texto traduzido (não mais o texto original)
+    const translatedText = document.getElementById('target-text').value;
+    
+    // Se não houver texto traduzido ou estiver em processo de tradução, não faça nada
+    if (!translatedText || translatedText === 'Translating...') {
+        return;
+    }
+    
+    // Obter o idioma de destino (não mais o idioma de origem)
+    const targetLang = document.getElementById('target-language').value;
     const grammarSection = document.querySelector('.grammar-analysis');
     
     // Limpar análises existentes (exceto título)
@@ -56,10 +71,10 @@ function updateGrammarAnalysis(text) {
         const openaiKey = document.getElementById('openai-key').value || localStorage.getItem('openai-key');
         if (openaiKey && openaiKey !== 'sk-********************') {
             // Show loading indicator
-            addVerbTenseAnalysis('Analyzing...', 'Processing grammar analysis with OpenAI.');
+            addVerbTenseAnalysis('Analyzing...', 'Processing grammar analysis of translated text with OpenAI.');
             
             // Use OpenAI for advanced grammar analysis with Reverso Context style
-            analyzeGrammarWithOpenAI(text, sourceLang)
+            analyzeGrammarWithOpenAI(translatedText, targetLang)
                 .then(analyses => {
                     // Clear existing analyses again
                     grammarSection.innerHTML = '';
@@ -89,10 +104,10 @@ function updateGrammarAnalysis(text) {
         const geminiKey = document.getElementById('gemini-key').value || localStorage.getItem('gemini-key');
         if (geminiKey) {
             // Show loading indicator
-            addVerbTenseAnalysis('Analyzing...', 'Processing grammar analysis with Gemini.');
+            addVerbTenseAnalysis('Analyzing...', 'Processing grammar analysis of translated text with Gemini.');
             
             // Use Gemini for advanced grammar analysis with Reverso Context style
-            analyzeGrammarWithGemini(text, sourceLang)
+            analyzeGrammarWithGemini(translatedText, targetLang)
                 .then(analyses => {
                     // Clear existing analyses again
                     grammarSection.innerHTML = '';

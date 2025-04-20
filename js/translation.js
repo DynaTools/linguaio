@@ -78,9 +78,9 @@ function initTranslationSystem() {
                 // Atualizar o campo de saída
                 targetText.value = translatedText;
                 
-                // Atualizar a análise gramatical
+                // Atualizar a análise gramatical - AGORA COM O TEXTO TRADUZIDO
                 if (typeof updateGrammarAnalysis === 'function') {
-                    updateGrammarAnalysis(sourceText.value);
+                    updateGrammarAnalysis();
                 }
             } catch (error) {
                 console.error("Translation error:", error);
@@ -146,6 +146,11 @@ function initTranslationSystem() {
                 
                 // Atualizar o campo de saída sem adicionar o prefixo [Tom: X]
                 targetText.value = translatedText;
+                
+                // Atualizar a análise gramatical DO TEXTO TRADUZIDO
+                if (typeof updateGrammarAnalysis === 'function') {
+                    updateGrammarAnalysis();
+                }
                 
                 // Restaurar texto do botão com confirmação
                 applyToneBtn.textContent = `✓ ${selectedTone} tone applied!`;
