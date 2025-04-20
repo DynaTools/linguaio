@@ -202,9 +202,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (sendEmailBtn && targetText) {
-        sendEmailBtn.addEventListener('click', () => {
+        sendEmailBtn.addEventListener('click', (e) => {
             const body = encodeURIComponent(targetText.value);
-            window.location.href = `mailto:?subject=Tradução%20LinguaIO&body=${body}`;
+            sendEmailBtn.setAttribute('href', `mailto:?subject=Tradução%20LinguaIO&body=${body}`);
+            // Não previne o default, deixa o navegador abrir o link
+        });
+        // Atualiza o href ao passar o mouse também
+        sendEmailBtn.addEventListener('mouseover', () => {
+            const body = encodeURIComponent(targetText.value);
+            sendEmailBtn.setAttribute('href', `mailto:?subject=Tradução%20LinguaIO&body=${body}`);
         });
     }
 });
