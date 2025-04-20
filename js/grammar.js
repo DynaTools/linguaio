@@ -30,8 +30,6 @@ function debounce(func, wait) {
 
 /**
  * Analisa o texto em busca de padrões gramaticais
- * Esta é uma implementação básica que identifica alguns padrões comuns em português e inglês
- * Para uma análise mais avançada, seria necessária uma API dedicada
  */
 function updateGrammarAnalysis(text) {
     // Obter o idioma atual
@@ -43,276 +41,301 @@ function updateGrammarAnalysis(text) {
     grammarSection.innerHTML = '';
     grammarSection.appendChild(sectionTitle);
     
-    // Verificar se devemos usar a API OpenAI para análise gramatical
-    const openaiKey = document.getElementById('openai-key').value || localStorage.getItem('openai-key');
+    // Determine which API to use based on the selected engine
+    const engineOptions = document.querySelectorAll('.engine-option');
+    let currentEngine = 'google'; 
     
-    if (openaiKey && openaiKey !== 'sk-********************' && typeof analyzeGrammarWithOpenAI === 'function') {
-        // Mostrar indicador de carregamento
-        addVerbTenseAnalysis('Analisando...', 'Processando análise gramatical avançada.');
-        
-        // Usar OpenAI para análise gramatical avançada
-        analyzeGrammarWithOpenAI(text, sourceLang)
-            .then(analyses => {
-                // Limpar análises existentes novamente
-                grammarSection.innerHTML = '';
-                grammarSection.appendChild(sectionTitle);
-                
-                // Adicionar as análises retornadas pela API
-                analyses.forEach(analysis => {
-                    addVerbTenseAnalysis(analysis.name, analysis.explanation);
-                });
-            })
-            .catch(error => {
-                console.error('Erro na análise gramatical com API:', error);
-                
-                // Limpar análises existentes novamente
-                grammarSection.innerHTML = '';
-                grammarSection.appendChild(sectionTitle);
-                
-                // Mostrar erro e fazer fallback para análise local
-                addVerbTenseAnalysis('Erro na análise com API', 
-                               'Usando análise gramatical básica como alternativa.');
-                
-                // Usar análise local como fallback
-                performLocalGrammarAnalysis(text, sourceLang, grammarSection);
-            });
-    } else {
-        // Usar análise local se não houver chave OpenAI
-        performLocalGrammarAnalysis(text, sourceLang, grammarSection);
-    }
-}
-
-/**
- * Executa análise gramatical local baseada em regras
- */
-function performLocalGrammarAnalysis(text, sourceLang, grammarSection) {
-    // Analisar baseado no idioma
-    if (sourceLang === 'pt') {
-        analyzePortugueseGrammar(text, grammarSection);
-    } else if (sourceLang === 'en') {
-        analyzeEnglishGrammar(text, grammarSection);
-    } else if (sourceLang === 'es') {
-        analyzeSpanishGrammar(text, grammarSection);
-    } else {
-        // Para outros idiomas, mostre uma mensagem informativa
-        addVerbTenseAnalysis('Análise não disponível', 
-                       `A análise gramatical para ${getLanguageName(sourceLang)} ainda não está implementada.`);
-    }
-}
-
-/**
- * Analisa estruturas gramaticais em português
- */
-function analyzePortugueseGrammar(text, grammarSection) {
-    const lowerText = text.toLowerCase();
-    
-    // Verificar tempos verbais comuns em português
-    const patterns = [
-        {
-            name: 'Presente do Indicativo',
-            regex: /\b(eu )?(falo|faço|vou|estou|tenho|sou|fico|quero|posso|sei|vejo|digo|venho|leio)\b/gi,
-            explanation: 'O presente do indicativo é usado para ações que acontecem no momento atual ou habitualmente.'
-        },
-        {
-            name: 'Pretérito Perfeito',
-            regex: /\b(eu )?(falei|fiz|fui|estive|tive|fiquei|quis|pude|soube|vi|disse|vim|li)\b/gi,
-            explanation: 'O pretérito perfeito expressa ações concluídas no passado.'
-        },
-        {
-            name: 'Futuro do Presente',
-            regex: /\b(eu )?(falarei|farei|irei|estarei|terei|serei|ficarei|quererei|poderei|saberei|verei|direi|virei|lerei)\b/gi,
-            explanation: 'O futuro do presente indica ações que acontecerão em um momento posterior ao atual.'
-        },
-        {
-            name: 'Futuro do Pretérito (Condicional)',
-            regex: /\b(eu )?(falaria|faria|iria|estaria|teria|seria|ficaria|quereria|poderia|saberia|veria|diria|viria|leria|gostaria)\b/gi,
-            explanation: 'O futuro do pretérito (condicional) expressa ações hipotéticas ou desejos.'
-        },
-        {
-            name: 'Imperativo',
-            regex: /\b(fale|faça|vá|esteja|tenha|seja|fique|queira|possa|saiba|veja|diga|venha|leia)\b/gi,
-            explanation: 'O imperativo é usado para dar ordens, conselhos ou fazer pedidos.'
-        },
-        {
-            name: 'Presente do Subjuntivo',
-            regex: /\b(que eu )?(fale|faça|vá|esteja|tenha|seja|fique|queira|possa|saiba|veja|diga|venha|leia)\b/gi,
-            explanation: 'O presente do subjuntivo expressa desejos, possibilidades ou suposições no presente.'
+    engineOptions.forEach(option => {
+        if (option.classList.contains('active')) {
+            currentEngine = option.dataset.engine;
         }
-    ];
+    });
     
-    // Verificar expressões específicas
-    if (lowerText.includes('está disponível')) {
-        addVerbTenseAnalysis('Presente do Indicativo', 
-                       'Em "está disponível", você está fazendo uma pergunta no tempo presente.');
-    }
-    
-    if (lowerText.includes('gostaria')) {
-        addVerbTenseAnalysis('Futuro do Pretérito (Condicional)', 
-                       'Em "gostaria", você está usando o futuro do pretérito, que expressa um desejo de forma educada.');
-    }
-    
-    // Verificar padrões mais genéricos
-    let foundPatterns = 0;
-    patterns.forEach(pattern => {
-        const matches = text.match(pattern.regex);
-        if (matches && matches.length > 0 && foundPatterns < 3) {
-            // Remove duplicatas
-            const uniqueMatches = [...new Set(matches.map(m => m.toLowerCase()))];
+    if (currentEngine === 'openai') {
+        // Check if OpenAI key is available
+        const openaiKey = document.getElementById('openai-key').value || localStorage.getItem('openai-key');
+        if (openaiKey && openaiKey !== 'sk-********************') {
+            // Show loading indicator
+            addVerbTenseAnalysis('Analyzing...', 'Processing grammar analysis with OpenAI.');
             
-            // Limitar a 3 análises para não sobrecarregar a interface
-            const verbList = uniqueMatches.slice(0, 3).join('", "');
-            addVerbTenseAnalysis(pattern.name, 
-                           `Identificado em "${verbList}". ${pattern.explanation}`);
-            foundPatterns++;
+            // Use OpenAI for advanced grammar analysis with Reverso Context style
+            analyzeGrammarWithOpenAI(text, sourceLang)
+                .then(analyses => {
+                    // Clear existing analyses again
+                    grammarSection.innerHTML = '';
+                    grammarSection.appendChild(sectionTitle);
+                    
+                    // Add the analyses returned by the API
+                    analyses.forEach(analysis => {
+                        addVerbTenseAnalysis(analysis.name, analysis.explanation, analysis.examples);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error in grammar analysis with API:', error);
+                    
+                    // Clear existing analyses again
+                    grammarSection.innerHTML = '';
+                    grammarSection.appendChild(sectionTitle);
+                    
+                    // Show activating LLM message
+                    addActivateLLMMessage();
+                });
+        } else {
+            // Show activating LLM message
+            addActivateLLMMessage();
         }
-    });
-    
-    // Se nenhum padrão foi encontrado
-    if (foundPatterns === 0) {
-        addVerbTenseAnalysis('Análise básica', 
-                       'Nenhum padrão verbal específico foi identificado. Tente um texto mais completo para análise.');
+    } else if (currentEngine === 'gemini') {
+        // Check if Gemini key is available
+        const geminiKey = document.getElementById('gemini-key').value || localStorage.getItem('gemini-key');
+        if (geminiKey) {
+            // Show loading indicator
+            addVerbTenseAnalysis('Analyzing...', 'Processing grammar analysis with Gemini.');
+            
+            // Use Gemini for advanced grammar analysis with Reverso Context style
+            analyzeGrammarWithGemini(text, sourceLang)
+                .then(analyses => {
+                    // Clear existing analyses again
+                    grammarSection.innerHTML = '';
+                    grammarSection.appendChild(sectionTitle);
+                    
+                    // Add the analyses returned by the API
+                    analyses.forEach(analysis => {
+                        addVerbTenseAnalysis(analysis.name, analysis.explanation, analysis.examples);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error in grammar analysis with Gemini API:', error);
+                    
+                    // Clear existing analyses again
+                    grammarSection.innerHTML = '';
+                    grammarSection.appendChild(sectionTitle);
+                    
+                    // Show activating LLM message
+                    addActivateLLMMessage();
+                });
+        } else {
+            // Show activating LLM message
+            addActivateLLMMessage();
+        }
+    } else {
+        // For Google Translate engine, show activating LLM message
+        addActivateLLMMessage();
     }
 }
 
 /**
- * Analisa estruturas gramaticais em inglês
+ * Shows a message prompting to activate LLM
  */
-function analyzeEnglishGrammar(text, grammarSection) {
-    const lowerText = text.toLowerCase();
+function addActivateLLMMessage() {
+    const grammarSection = document.querySelector('.grammar-analysis');
     
-    // Verificar tempos verbais comuns em inglês
-    const patterns = [
-        {
-            name: 'Present Simple',
-            regex: /\b(i |you |he |she |it |we |they )?(am|is|are|go|do|have|want|need|like|see|say|know)\b/gi,
-            explanation: 'The present simple is used for habits, facts and regular actions.'
-        },
-        {
-            name: 'Present Continuous',
-            regex: /\b(i |you |he |she |it |we |they )?(am|is|are) ([\w]+ing)\b/gi,
-            explanation: 'The present continuous is used for actions happening now or temporary situations.'
-        },
-        {
-            name: 'Past Simple',
-            regex: /\b(i |you |he |she |it |we |they )?(was|were|went|did|had|wanted|needed|liked|saw|said|knew)\b/gi,
-            explanation: 'The past simple is used for completed actions in the past.'
-        },
-        {
-            name: 'Future with Will',
-            regex: /\b(i |you |he |she |it |we |they )?(will) ([\w]+)\b/gi,
-            explanation: 'The future with "will" is used for predictions or spontaneous decisions.'
-        },
-        {
-            name: 'Future with Going to',
-            regex: /\b(i |you |he |she |it |we |they )?(am|is|are) going to ([\w]+)\b/gi,
-            explanation: 'The future with "going to" is used for planned actions or evident predictions.'
-        },
-        {
-            name: 'Conditional',
-            regex: /\b(i |you |he |she |it |we |they )?(would) ([\w]+)\b/gi,
-            explanation: 'The conditional is used for hypothetical situations or polite requests.'
-        }
-    ];
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'llm-message';
+    messageDiv.innerHTML = `
+        <h3>Advanced Grammar Analysis</h3>
+        <p>Please activate your LLM Model in the settings to enable advanced grammar analysis with context examples.</p>
+        <button id="activate-llm-btn" class="secondary">Go to Settings</button>
+    `;
     
-    // Verificar expressões específicas
-    if (lowerText.includes('would like')) {
-        addVerbTenseAnalysis('Conditional Mood', 
-                       'In "would like", you are using the conditional mood, expressing a polite request or desire.');
-    }
+    grammarSection.appendChild(messageDiv);
     
-    if (lowerText.includes('are you available')) {
-        addVerbTenseAnalysis('Present Simple', 
-                       'In "are you available", you are asking a direct question in the present simple tense.');
-    }
-    
-    // Verificar padrões mais genéricos
-    let foundPatterns = 0;
-    patterns.forEach(pattern => {
-        const matches = text.match(pattern.regex);
-        if (matches && matches.length > 0 && foundPatterns < 3) {
-            const verbMatch = matches[0].trim();
-            addVerbTenseAnalysis(pattern.name, 
-                           `Identified in "${verbMatch}". ${pattern.explanation}`);
-            foundPatterns++;
-        }
+    // Add event listener to the button
+    document.getElementById('activate-llm-btn').addEventListener('click', function() {
+        // Navigate to settings
+        document.getElementById('settings-link').click();
     });
+}
+
+/**
+ * Function to analyze grammar using OpenAI with Reverso Context style
+ */
+async function analyzeGrammarWithOpenAI(text, lang) {
+    // Get API key
+    const apiKey = document.getElementById('openai-key').value || localStorage.getItem('openai-key');
     
-    // Se nenhum padrão foi encontrado
-    if (foundPatterns === 0) {
-        addVerbTenseAnalysis('Basic Analysis', 
-                       'No specific verb patterns identified. Try a more complete text for analysis.');
+    if (!apiKey || apiKey === 'sk-********************') {
+        throw new Error('OpenAI API key not configured');
+    }
+    
+    try {
+        // Create the prompt for grammar analysis with context examples
+        const prompt = `Analyze the grammar in this ${getLanguageName(lang)} text:
+        "${text}"
+        
+        Return exactly 3 grammatical elements found in the text.
+        
+        For each element, provide:
+        1. The name of the grammatical structure or verb tense
+        2. A brief explanation of how it's used in the text
+        3. 3 context examples showing how this grammatical structure is used in different contexts (similar to Reverso Context)
+        
+        Format your response as a JSON array with objects containing 'name', 'explanation', and 'examples' properties.
+        Examples should be an array of strings.
+        
+        Example response format:
+        [
+          {
+            "name": "Present Simple",
+            "explanation": "In 'I work', present simple is used for habitual actions.",
+            "examples": [
+              "I work at a bank. (habitual action)",
+              "The train leaves at 8:30 AM. (scheduled event)",
+              "Water boils at 100°C. (scientific fact)"
+            ]
+          }
+        ]`;
+        
+        // API request configuration
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: 'gpt-3.5-turbo',
+                messages: [
+                    {role: 'system', content: 'You are a grammar expert that provides contextual examples like Reverso Context.'},
+                    {role: 'user', content: prompt}
+                ],
+                temperature: 0.3,
+                max_tokens: 1000
+            })
+        });
+        
+        const data = await response.json();
+        
+        // Check for errors
+        if (data.error) {
+            throw new Error(data.error.message);
+        }
+        
+        // Try to extract JSON from the response
+        try {
+            const content = data.choices[0].message.content.trim();
+            // Find JSON in the content (might be surrounded by text)
+            const jsonMatch = content.match(/\[[\s\S]*\]/);
+            
+            if (jsonMatch) {
+                const analysisArray = JSON.parse(jsonMatch[0]);
+                return analysisArray;
+            } else {
+                // Try to parse entire response as JSON
+                return JSON.parse(content);
+            }
+        } catch (parseError) {
+            console.error('Error parsing JSON response:', parseError);
+            // Return the response as text if unable to parse as JSON
+            return [{
+                name: 'Text Analysis',
+                explanation: data.choices[0].message.content.trim(),
+                examples: ["Example 1", "Example 2", "Example 3"]
+            }];
+        }
+    } catch (error) {
+        console.error('Error in grammar analysis with OpenAI:', error);
+        throw error;
     }
 }
 
 /**
- * Analisa estruturas gramaticais em espanhol
+ * Function to analyze grammar using Google Gemini with Reverso Context style
  */
-function analyzeSpanishGrammar(text, grammarSection) {
-    const lowerText = text.toLowerCase();
+async function analyzeGrammarWithGemini(text, lang) {
+    // Get API key
+    const apiKey = document.getElementById('gemini-key').value || localStorage.getItem('gemini-key');
     
-    // Verificar tempos verbais comuns em espanhol
-    const patterns = [
-        {
-            name: 'Presente del Indicativo',
-            regex: /\b(yo |tú |él |ella |usted |nosotros |vosotros |ellos |ellas |ustedes )?(hablo|hablas|habla|hablamos|habláis|hablan|estoy|estás|está|estamos|estáis|están)\b/gi,
-            explanation: 'El presente del indicativo se usa para acciones habituales o hechos.'
-        },
-        {
-            name: 'Pretérito Perfecto',
-            regex: /\b(yo |tú |él |ella |usted |nosotros |vosotros |ellos |ellas |ustedes )?(he|has|ha|hemos|habéis|han) ([\w]+ado|[\w]+ido)\b/gi,
-            explanation: 'El pretérito perfecto se usa para acciones completadas en un pasado reciente.'
-        },
-        {
-            name: 'Pretérito Indefinido',
-            regex: /\b(yo |tú |él |ella |usted |nosotros |vosotros |ellos |ellas |ustedes )?(hablé|hablaste|habló|hablamos|hablasteis|hablaron|estuve|estuviste|estuvo|estuvimos|estuvisteis|estuvieron)\b/gi,
-            explanation: 'El pretérito indefinido se usa para acciones completadas en un momento específico del pasado.'
-        },
-        {
-            name: 'Futuro Simple',
-            regex: /\b(yo |tú |él |ella |usted |nosotros |vosotros |ellos |ellas |ustedes )?(hablaré|hablarás|hablará|hablaremos|hablaréis|hablarán)\b/gi,
-            explanation: 'El futuro simple se usa para acciones que ocurrirán en el futuro.'
-        },
-        {
-            name: 'Condicional',
-            regex: /\b(yo |tú |él |ella |usted |nosotros |vosotros |ellos |ellas |ustedes )?(hablaría|hablarías|hablaría|hablaríamos|hablaríais|hablarían|gustaría)\b/gi,
-            explanation: 'El condicional se usa para expresar hipótesis o deseos.'
-        }
-    ];
-    
-    // Verificar expressões específicas
-    if (lowerText.includes('me gustaría')) {
-        addVerbTenseAnalysis('Condicional', 
-                       'En "me gustaría", estás usando el condicional, que expresa un deseo de forma educada.');
+    if (!apiKey) {
+        throw new Error('Gemini API key not configured');
     }
     
-    if (lowerText.includes('está disponible')) {
-        addVerbTenseAnalysis('Presente del Indicativo', 
-                       'En "está disponible", estás haciendo una pregunta en el tiempo presente.');
-    }
-    
-    // Verificar padrões mais genéricos
-    let foundPatterns = 0;
-    patterns.forEach(pattern => {
-        const matches = text.match(pattern.regex);
-        if (matches && matches.length > 0 && foundPatterns < 3) {
-            const verbMatch = matches[0].trim();
-            addVerbTenseAnalysis(pattern.name, 
-                           `Identificado en "${verbMatch}". ${pattern.explanation}`);
-            foundPatterns++;
+    try {
+        // Create the prompt for grammar analysis with context examples
+        const prompt = `Analyze the grammar in this ${getLanguageName(lang)} text:
+        "${text}"
+        
+        Return exactly 3 grammatical elements found in the text.
+        
+        For each element, provide:
+        1. The name of the grammatical structure or verb tense
+        2. A brief explanation of how it's used in the text
+        3. 3 context examples showing how this grammatical structure is used in different contexts (similar to Reverso Context)
+        
+        Format your response as a JSON array with objects containing 'name', 'explanation', and 'examples' properties.
+        Examples should be an array of strings.
+        
+        Example response format:
+        [
+          {
+            "name": "Present Simple",
+            "explanation": "In 'I work', present simple is used for habitual actions.",
+            "examples": [
+              "I work at a bank. (habitual action)",
+              "The train leaves at 8:30 AM. (scheduled event)",
+              "Water boils at 100°C. (scientific fact)"
+            ]
+          }
+        ]`;
+        
+        // URL for Gemini API
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
+        
+        // API request configuration
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{ text: prompt }]
+                }],
+                generationConfig: {
+                    temperature: 0.2,
+                    maxOutputTokens: 1000
+                }
+            })
+        });
+        
+        const data = await response.json();
+        
+        // Check for errors
+        if (data.error) {
+            throw new Error(data.error.message);
         }
-    });
-    
-    // Se nenhum padrão foi encontrado
-    if (foundPatterns === 0) {
-        addVerbTenseAnalysis('Análisis básico', 
-                       'No se identificaron patrones verbales específicos. Intenta con un texto más completo para el análisis.');
+        
+        // Try to extract JSON from the response
+        try {
+            const content = data.candidates[0].content.parts[0].text.trim();
+            // Find JSON in the content (might be surrounded by text)
+            const jsonMatch = content.match(/\[[\s\S]*\]/);
+            
+            if (jsonMatch) {
+                const analysisArray = JSON.parse(jsonMatch[0]);
+                return analysisArray;
+            } else {
+                // Try to parse entire response as JSON
+                return JSON.parse(content);
+            }
+        } catch (parseError) {
+            console.error('Error parsing JSON response:', parseError);
+            // Return the response as text if unable to parse as JSON
+            return [{
+                name: 'Text Analysis',
+                explanation: data.candidates[0].content.parts[0].text.trim(),
+                examples: ["Example 1", "Example 2", "Example 3"]
+            }];
+        }
+    } catch (error) {
+        console.error('Error in grammar analysis with Gemini:', error);
+        throw error;
     }
 }
 
 /**
- * Função auxiliar para adicionar um elemento de análise de tempo verbal à interface
+ * Helper function to add a verb tense analysis element to the interface
  */
-function addVerbTenseAnalysis(tenseName, explanation) {
+function addVerbTenseAnalysis(tenseName, explanation, examples = []) {
     const grammarSection = document.querySelector('.grammar-analysis');
     
     const verbTense = document.createElement('div');
@@ -328,5 +351,58 @@ function addVerbTenseAnalysis(tenseName, explanation) {
     
     verbTense.appendChild(tenseNameEl);
     verbTense.appendChild(explanationEl);
+    
+    // Add context examples if available
+    if (examples && examples.length > 0) {
+        const contextSection = document.createElement('div');
+        contextSection.className = 'context-examples';
+        
+        const contextTitle = document.createElement('div');
+        contextTitle.className = 'context-title';
+        contextTitle.textContent = 'Context Examples:';
+        
+        const examplesList = document.createElement('ul');
+        examples.forEach(example => {
+            const exampleItem = document.createElement('li');
+            exampleItem.textContent = example;
+            examplesList.appendChild(exampleItem);
+        });
+        
+        contextSection.appendChild(contextTitle);
+        contextSection.appendChild(examplesList);
+        verbTense.appendChild(contextSection);
+    }
+    
     grammarSection.appendChild(verbTense);
 }
+
+// Add CSS for the LLM activation message
+const style = document.createElement('style');
+style.textContent = `
+.llm-message {
+    background-color: var(--light-color);
+    padding: 15px;
+    border-radius: var(--border-radius);
+    text-align: center;
+}
+
+.llm-message h3 {
+    margin-bottom: 10px;
+    color: var(--primary-color);
+}
+
+.llm-message p {
+    margin-bottom: 15px;
+}
+
+#activate-llm-btn {
+    display: inline-block;
+    background-color: var(--accent-color);
+    color: white;
+}
+
+#activate-llm-btn:hover {
+    background-color: var(--secondary-color);
+}
+`;
+document.head.appendChild(style);

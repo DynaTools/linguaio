@@ -1,128 +1,120 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LinguAI - Tradutor Inteligente</title>
+    <title>LinguaIO - Intelligent Translator</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <div class="logo">
-                <span class="logo-icon">🌐</span> LinguAI
+            <div class="logo" id="logo-home">
+                <span class="logo-icon">🌐</span> LinguaIO
             </div>
             <nav>
                 <ul>
-                    <li><a href="#" class="active">Tradutor</a></li>
-                    <li><a href="#">Praticar</a></li>
-                    <li><a href="#">Configurações</a></li>
+                    <li><a href="#" class="active" id="translator-link">Translator</a></li>
+                    <li><a href="#" id="settings-link">Settings</a></li>
                 </ul>
             </nav>
             <div class="user-section">
-                <div class="language-flags">
-                   	<img src="images/flags-pt.svg" alt="Português" class="flag-btn active" title="Português">
-			<img src="images/flags-en.svg" alt="English" class="flag-btn" title="English">
-			<img src="images/flags-es.svg" alt="Español" class="flag-btn" title="Español">
-			<img src="images/flags-it.svg" alt="Italiano" class="flag-btn" title="Italiano">
-                </div>
-                <button class="login-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 48 48">
-                        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-                        <path fill="none" d="M0 0h48v48H0z"/>
-                    </svg>
-                    Entrar com Google
-                </button>
+                <!-- Button removed as requested -->
             </div>
         </header>
         
         <div class="main-content">
             <div class="translator-container">
+                <div class="translation-engine">
+                    <h3>Translation Engine:</h3>
+                    <div class="engine-options">
+                        <div class="engine-option active" data-engine="google">Google Translate</div>
+                        <div class="engine-option" data-engine="openai">OpenAI</div>
+                        <div class="engine-option" data-engine="gemini">Google Gemini</div>
+                    </div>
+                    <p class="engine-info">Use OpenAI or Google Gemini for higher quality translations and additional features. Configure API keys in Settings.</p>
+                </div>
+                
                 <div class="language-selector">
                     <div class="language-dropdown">
-                        <span>De:</span>
+                        <span>From:</span>
                         <select id="source-language">
-                            <option value="pt">Português</option>
-                            <option value="en">Inglês</option>
-                            <option value="es">Espanhol</option>
-                            <option value="fr">Francês</option>
-                            <option value="de">Alemão</option>
+                            <option value="en">English</option>
+                            <option value="pt">Portuguese</option>
+                            <option value="es">Spanish</option>
+                            <option value="fr">French</option>
+                            <option value="de">German</option>
+                            <option value="it">Italian</option>
                         </select>
                     </div>
                     
                     <button class="swap-btn">⇄</button>
                     
                     <div class="language-dropdown">
-                        <span>Para:</span>
+                        <span>To:</span>
                         <select id="target-language">
-                            <option value="en">Inglês</option>
-                            <option value="pt">Português</option>
-                            <option value="es">Espanhol</option>
-                            <option value="fr">Francês</option>
-                            <option value="de">Alemão</option>
+                            <option value="en">English</option>
+                            <option value="pt">Portuguese</option>
+                            <option value="es">Spanish</option>
+                            <option value="fr">French</option>
+                            <option value="de">German</option>
+                            <option value="it">Italian</option>
                         </select>
                     </div>
                 </div>
                 
                 <div class="text-areas">
                     <div class="text-box">
-                        <textarea id="source-text" placeholder="Digite o texto para traduzir...">Olá, gostaria de agendar uma reunião para discutir o projeto. Está disponível na próxima semana?</textarea>
+                        <textarea id="source-text" placeholder="Type text to translate...">Hello, I would like to schedule a meeting to discuss the project. Are you available next week?</textarea>
                         <div class="action-buttons">
-                            <button class="secondary" id="clear-btn">Limpar</button>
+                            <button class="secondary" id="clear-btn">Clear</button>
                         </div>
                     </div>
                     
                     <div class="text-box">
-                        <textarea id="target-text" readonly>Hello, I would like to schedule a meeting to discuss the project. Are you available next week?</textarea>
+                        <textarea id="target-text" readonly>Olá, gostaria de agendar uma reunião para discutir o projeto. Está disponível na próxima semana?</textarea>
                         <div class="action-buttons">
-                            <button class="secondary" id="copy-btn">Copiar</button>
-                            <button id="translate-btn">Traduzir</button>
+                            <button class="secondary" id="copy-btn">Copy</button>
+                            <button id="translate-btn">Translate</button>
                         </div>
                     </div>
                 </div>
                 
                 <div class="tone-adjuster">
-                    <h3>Ajustar Tom:</h3>
+                    <h3>Adjust Tone:</h3>
                     <div class="tone-options">
-                        <div class="tone-option">Neutro</div>
+                        <div class="tone-option">Neutral</div>
                         <div class="tone-option active">Casual</div>
                         <div class="tone-option">Formal</div>
-                        <div class="tone-option">Profissional</div>
-                        <div class="tone-option">Amigável</div>
+                        <div class="tone-option">Professional</div>
+                        <div class="tone-option">Friendly</div>
                     </div>
                     <div class="action-buttons tone-apply">
-                        <button class="primary-tone" id="apply-tone-btn">Aplicar Tom à Tradução</button>
+                        <button class="primary-tone" id="apply-tone-btn">Apply Tone to Translation</button>
                     </div>
                 </div>
             </div>
             
             <div class="sidebar">
                 <div class="grammar-analysis">
-                    <h3 class="section-title">📝 Análise Gramatical</h3>
+                    <h3 class="section-title">📝 Grammar Analysis</h3>
                     
-                    <div class="verb-tense">
-                        <div class="tense-name">Presente do Indicativo (Condicional)</div>
-                        <div class="tense-explanation">Em "gostaria", você está usando o futuro do pretérito, que expressa um desejo de forma educada.</div>
-                    </div>
-                    
-                    <div class="verb-tense">
-                        <div class="tense-name">Presente do Indicativo</div>
-                        <div class="tense-explanation">Em "está disponível", você está fazendo uma pergunta no tempo presente.</div>
+                    <div class="llm-message">
+                        <h3>Advanced Grammar Analysis</h3>
+                        <p>Please activate your LLM Model in the settings to enable advanced grammar analysis with context examples.</p>
+                        <button id="activate-llm-btn" class="secondary">Go to Settings</button>
                     </div>
                 </div>
                 
                 <div class="shadowing-tool">
-                    <h3 class="section-title">🔊 Prática de Shadowing</h3>
+                    <h3 class="section-title">🔊 Shadowing Practice</h3>
                     
                     <div class="audio-controls">
-                        <button id="play-btn">▶️ Reproduzir</button>
+                        <button id="play-btn">▶️ Play</button>
                         <select id="speed-select">
-                            <option>Velocidade: Normal</option>
-                            <option>Velocidade: Lenta</option>
-                            <option>Velocidade: Muito Lenta</option>
+                            <option>Speed: Normal</option>
+                            <option>Speed: Slow</option>
+                            <option>Speed: Very Slow</option>
                         </select>
                     </div>
                     
@@ -175,40 +167,41 @@
                     
                     <div class="record-btn" id="record-btn">🎙️</div>
                     
-                    <p>Precisão da pronúncia:</p>
+                    <p>Pronunciation accuracy:</p>
                     <div class="accuracy-meter">
                         <div class="accuracy-fill"></div>
                     </div>
                 </div>
                 
-                <div class="settings-panel">
-                    <h3 class="section-title">⚙️ Configurações de API</h3>
+                <div class="settings-panel" style="display: none;">
+                    <h3 class="section-title">⚙️ API Settings</h3>
                     
                     <div class="api-settings">
                         <div class="api-input">
-                            <label>Chave da API OpenAI:</label>
-                            <input type="password" id="openai-key" placeholder="sk-..." value="sk-********************">
+                            <label>OpenAI API Key:</label>
+                            <input type="password" id="openai-key" placeholder="sk-..." value="">
                         </div>
                         
                         <div class="api-input">
-                            <label>Chave da API Google Gemini:</label>
-                            <input type="password" id="gemini-key" placeholder="Sua chave Gemini...">
+                            <label>Google Gemini API Key:</label>
+                            <input type="password" id="gemini-key" placeholder="Your Gemini key...">
                         </div>
                         
-                        <button id="save-settings-btn">Salvar Configurações</button>
+                        <button id="save-settings-btn">Save Settings</button>
                     </div>
                 </div>
             </div>
         </div>
         
         <footer>
-            LinguAI © 2025 • Traduza, Aprenda e Pratique
+            LinguaIO © 2025 • Translate, Learn and Practice
         </footer>
     </div>
     
     <!-- Scripts -->
     <script src="js/translation.js"></script>
     <script src="js/openai.js"></script>
+    <script src="js/gemini.js"></script>
     <script src="js/grammar.js"></script>
     <script src="js/audio.js"></script>
     <script src="js/main.js"></script>

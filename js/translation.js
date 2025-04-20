@@ -1,4 +1,4 @@
-// translate.js - Módulo para funcionalidades básicas de tradução
+// translation.js - Módulo para funcionalidades básicas de tradução
 
 /**
  * Inicializa o sistema de tradução
@@ -10,32 +10,69 @@ function initTranslationSystem() {
     const sourceLanguage = document.getElementById('source-language');
     const targetLanguage = document.getElementById('target-language');
     const applyToneBtn = document.getElementById('apply-tone-btn');
+    
+    // Engine selection
+    const engineOptions = document.querySelectorAll('.engine-option');
+    let currentEngine = 'google'; // engine padrão
+
+    engineOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            // Remover classe ativa de todas as opções
+            engineOptions.forEach(o => o.classList.remove('active'));
+            // Adicionar classe ativa à opção selecionada
+            option.classList.add('active');
+            // Atualizar o motor de tradução atual
+            currentEngine = option.dataset.engine;
+        });
+    });
 
     // Evento do botão traduzir
     translateBtn.addEventListener('click', async () => {
         if (sourceText.value) {
             // Mostrar mensagem de carregamento
-            targetText.value = 'Traduzindo...';
+            targetText.value = 'Translating...';
             
             try {
-                // Verificar se há chave OpenAI configurada
-                const openaiKey = document.getElementById('openai-key').value;
-                
                 let translatedText;
-                if (openaiKey && openaiKey !== 'sk-********************') {
-                    // Usar OpenAI se houver chave configurada
-                    translatedText = await translateWithOpenAI(
-                        sourceText.value,
-                        sourceLanguage.value,
-                        targetLanguage.value
-                    );
-                } else {
-                    // Fallback para Google Translate
-                    translatedText = await translateText(
-                        sourceText.value,
-                        sourceLanguage.value,
-                        targetLanguage.value
-                    );
+                
+                switch(currentEngine) {
+                    case 'openai':
+                        // Verificar se há chave OpenAI configurada
+                        const openaiKey = document.getElementById('openai-key').value || localStorage.getItem('openai-key');
+                        if (openaiKey && openaiKey !== 'sk-********************') {
+                            translatedText = await translateWithOpenAI(
+                                sourceText.value,
+                                sourceLanguage.value,
+                                targetLanguage.value
+                            );
+                        } else {
+                            translatedText = "Please configure your OpenAI API key in Settings to use this feature.";
+                        }
+                        break;
+                        
+                    case 'gemini':
+                        // Verificar se há chave Gemini configurada
+                        const geminiKey = document.getElementById('gemini-key').value || localStorage.getItem('gemini-key');
+                        if (geminiKey && geminiKey !== '') {
+                            translatedText = await translateWithGemini(
+                                sourceText.value,
+                                sourceLanguage.value,
+                                targetLanguage.value
+                            );
+                        } else {
+                            translatedText = "Please configure your Google Gemini API key in Settings to use this feature.";
+                        }
+                        break;
+                        
+                    case 'google':
+                    default:
+                        // Usar Google Translate como fallback
+                        translatedText = await translateText(
+                            sourceText.value,
+                            sourceLanguage.value,
+                            targetLanguage.value
+                        );
+                        break;
                 }
                 
                 // Atualizar o campo de saída
@@ -46,55 +83,79 @@ function initTranslationSystem() {
                     updateGrammarAnalysis(sourceText.value);
                 }
             } catch (error) {
-                console.error("Erro de tradução:", error);
-                targetText.value = `Erro na tradução: ${error.message}`;
+                console.error("Translation error:", error);
+                targetText.value = `Translation error: ${error.message}`;
             }
         }
     });
 
     // Evento do botão aplicar tom
     applyToneBtn.addEventListener('click', async () => {
-        if (targetText.value && targetText.value !== 'Traduzindo...') {
+        if (targetText.value && targetText.value !== 'Translating...') {
             // Obter o tom selecionado
             const selectedTone = document.querySelector('.tone-option.active').textContent;
             
             // Feedback visual
             const originalBtnText = applyToneBtn.textContent;
-            applyToneBtn.textContent = `Aplicando tom ${selectedTone}...`;
+            applyToneBtn.textContent = `Applying ${selectedTone} tone...`;
             
             try {
-                // Obter chave da OpenAI para ajuste de tom
-                const openaiKey = document.getElementById('openai-key').value;
+                let translatedText;
                 
-                if (openaiKey && openaiKey !== 'sk-********************') {
-                    // Usar OpenAI para ajustar o tom
-                    const adjustedText = await translateWithOpenAI(
-                        sourceText.value,
-                        sourceLanguage.value,
-                        targetLanguage.value,
-                        selectedTone
-                    );
-                    
-                    targetText.value = adjustedText;
-                } else {
-                    // Sem API, apenas adicionar uma indicação do tom
-                    if (!targetText.value.includes('[Tom:')) {
-                        targetText.value = `[Tom: ${selectedTone}] ${targetText.value}`;
-                    } else {
-                        // Substituir tom existente
-                        targetText.value = targetText.value.replace(/\[Tom: [^\]]+\] /, `[Tom: ${selectedTone}] `);
-                    }
+                switch(currentEngine) {
+                    case 'openai':
+                        // Verificar se há chave OpenAI configurada
+                        const openaiKey = document.getElementById('openai-key').value || localStorage.getItem('openai-key');
+                        if (openaiKey && openaiKey !== 'sk-********************') {
+                            translatedText = await translateWithOpenAI(
+                                sourceText.value,
+                                sourceLanguage.value,
+                                targetLanguage.value,
+                                selectedTone
+                            );
+                        } else {
+                            translatedText = "Please configure your OpenAI API key in Settings to use this feature.";
+                        }
+                        break;
+                        
+                    case 'gemini':
+                        // Verificar se há chave Gemini configurada
+                        const geminiKey = document.getElementById('gemini-key').value || localStorage.getItem('gemini-key');
+                        if (geminiKey && geminiKey !== '') {
+                            translatedText = await translateWithGemini(
+                                sourceText.value,
+                                sourceLanguage.value,
+                                targetLanguage.value,
+                                selectedTone
+                            );
+                        } else {
+                            translatedText = "Please configure your Google Gemini API key in Settings to use this feature.";
+                        }
+                        break;
+                        
+                    case 'google':
+                    default:
+                        // Com Google Translate, simplesmente re-traduzir
+                        translatedText = await translateText(
+                            sourceText.value,
+                            sourceLanguage.value,
+                            targetLanguage.value
+                        );
+                        break;
                 }
                 
+                // Atualizar o campo de saída sem adicionar o prefixo [Tom: X]
+                targetText.value = translatedText;
+                
                 // Restaurar texto do botão com confirmação
-                applyToneBtn.textContent = `✓ Tom ${selectedTone} aplicado!`;
+                applyToneBtn.textContent = `✓ ${selectedTone} tone applied!`;
                 setTimeout(() => {
                     applyToneBtn.textContent = originalBtnText;
                 }, 2000);
                 
             } catch (error) {
-                console.error('Erro ao aplicar tom:', error);
-                applyToneBtn.textContent = `Erro ao aplicar tom: ${error.message}`;
+                console.error('Error applying tone:', error);
+                applyToneBtn.textContent = `Error applying tone: ${error.message}`;
                 setTimeout(() => {
                     applyToneBtn.textContent = originalBtnText;
                 }, 3000);
@@ -118,7 +179,7 @@ async function translateText(text, sourceLang, targetLang) {
         const response = await fetch(url);
         
         if (!response.ok) {
-            throw new Error(`Erro HTTP: ${response.status}`);
+            throw new Error(`HTTP error: ${response.status}`);
         }
         
         const data = await response.json();
@@ -131,8 +192,8 @@ async function translateText(text, sourceLang, targetLang) {
         
         return translatedText;
     } catch (error) {
-        console.error('Erro ao traduzir texto:', error);
-        return `Erro na tradução: ${error.message}`;
+        console.error('Error translating text:', error);
+        return `Translation error: ${error.message}`;
     }
 }
 

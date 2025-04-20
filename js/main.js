@@ -12,8 +12,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const translateBtn = document.getElementById('translate-btn');
     const toneOptions = document.querySelectorAll('.tone-option');
     const applyToneBtn = document.getElementById('apply-tone-btn');
-    const flagBtns = document.querySelectorAll('.flag-btn');
+    const settingsLink = document.getElementById('settings-link');
     const saveSettingsBtn = document.getElementById('save-settings-btn');
+    const logoHome = document.getElementById('logo-home');
+    const translatorLink = document.getElementById('translator-link');
 
     // Inicializar os diferentes módulos
     initUIControls();
@@ -50,14 +52,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     .then(() => {
                         // Feedback visual de cópia bem-sucedida
                         const originalText = copyBtn.textContent;
-                        copyBtn.textContent = '✓ Copiado!';
+                        copyBtn.textContent = '✓ Copied!';
                         setTimeout(() => {
                             copyBtn.textContent = originalText;
                         }, 2000);
                     })
                     .catch(err => {
-                        console.error('Erro ao copiar texto: ', err);
-                        alert('Não foi possível copiar o texto. Tente novamente.');
+                        console.error('Error copying text: ', err);
+                        alert('Could not copy the text. Please try again.');
                     });
             }
         });
@@ -72,36 +74,99 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // Alternar bandeiras
-        flagBtns.forEach(flag => {
-            flag.addEventListener('click', () => {
-                // Remover classe ativa de todas as bandeiras
-                flagBtns.forEach(f => f.classList.remove('active'));
-                // Adicionar classe ativa à bandeira selecionada
-                flag.classList.add('active');
-                
-                // Aqui você pode adicionar lógica para mudar o idioma da interface
-                const language = flag.alt;
-                console.log(`Idioma alterado para: ${language}`);
-            });
+        // Go back to translator from logo
+        logoHome.addEventListener('click', function() {
+            showTranslator();
+        });
+        
+        // Go back to translator from nav link
+        translatorLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            showTranslator();
         });
 
-        // Salvar configurações
-        saveSettingsBtn.addEventListener('click', () => {
-            const openaiKey = document.getElementById('openai-key').value;
-            const geminiKey = document.getElementById('gemini-key').value;
+        // Link to settings page
+        settingsLink.addEventListener('click', function(e) {
+            e.preventDefault();
             
-            // Salvar as chaves no localStorage
-            if (openaiKey) localStorage.setItem('openai-key', openaiKey);
-            if (geminiKey) localStorage.setItem('gemini-key', geminiKey);
+            // Create settings page if it doesn't exist
+            if (!document.querySelector('.settings-page')) {
+                const settingsPage = document.createElement('div');
+                settingsPage.className = 'settings-page';
+                
+                // Get the settings panel content
+                const settingsPanel = document.querySelector('.settings-panel');
+                
+                // Create settings page content
+                settingsPage.innerHTML = `
+                    <h2>Settings</h2>
+                    <div class="settings-container">
+                        <div class="api-settings">
+                            <div class="api-input">
+                                <label>OpenAI API Key:</label>
+                                <input type="password" id="settings-openai-key" placeholder="sk-..." value="${document.getElementById('openai-key').value}">
+                            </div>
+                            
+                            <div class="api-input">
+                                <label>Google Gemini API Key:</label>
+                                <input type="password" id="settings-gemini-key" placeholder="Your Gemini key..." value="${document.getElementById('gemini-key').value}">
+                            </div>
+                            
+                            <button id="settings-save-btn">Save Settings</button>
+                        </div>
+                    </div>
+                    <button class="back-btn">Back to Translator</button>
+                `;
+                
+                // Add to main content
+                document.querySelector('.main-content').prepend(settingsPage);
+                
+                // Add event listener for save button in settings
+                document.getElementById('settings-save-btn').addEventListener('click', function() {
+                    const openaiKey = document.getElementById('settings-openai-key').value;
+                    const geminiKey = document.getElementById('settings-gemini-key').value;
+                    
+                    // Save keys to localStorage
+                    if (openaiKey) localStorage.setItem('openai-key', openaiKey);
+                    if (geminiKey) localStorage.setItem('gemini-key', geminiKey);
+                    
+                    // Update the main form fields
+                    document.getElementById('openai-key').value = openaiKey;
+                    document.getElementById('gemini-key').value = geminiKey;
+                    
+                    // Feedback visual
+                    const originalText = this.textContent;
+                    this.textContent = '✓ Settings Saved!';
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                    }, 2000);
+                });
+                
+                // Add event listener for back button
+                document.querySelector('.back-btn').addEventListener('click', function() {
+                    showTranslator();
+                });
+            }
             
-            // Feedback visual
-            const originalText = saveSettingsBtn.textContent;
-            saveSettingsBtn.textContent = '✓ Configurações Salvas!';
-            setTimeout(() => {
-                saveSettingsBtn.textContent = originalText;
-            }, 2000);
+            // Hide translator, show settings
+            document.querySelector('.translator-container').style.display = 'none';
+            document.querySelector('.settings-page').style.display = 'block';
         });
+
+        // Add event listener for the activation button in grammar analysis
+        document.getElementById('activate-llm-btn').addEventListener('click', function() {
+            // Navigate to settings
+            settingsLink.click();
+        });
+
+        // Function to show translator and hide settings
+        function showTranslator() {
+            document.querySelector('.translator-container').style.display = 'block';
+            
+            if (document.querySelector('.settings-page')) {
+                document.querySelector('.settings-page').style.display = 'none';
+            }
+        }
 
         // Carregar configurações salvas
         const savedOpenAIKey = localStorage.getItem('openai-key');
