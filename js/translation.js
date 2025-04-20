@@ -77,6 +77,9 @@ function initTranslationSystem() {
                 
                 // Atualizar o campo de saída
                 targetText.value = translatedText;
+                if (typeof updateEmailHref === 'function') {
+                    updateEmailHref();
+                }
                 
                 // Atualizar a análise gramatical - AGORA COM O TEXTO TRADUZIDO
                 if (typeof updateGrammarAnalysis === 'function') {

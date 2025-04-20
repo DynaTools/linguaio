@@ -15,11 +15,12 @@
             <nav>
                 <ul>
                     <li><a href="#" class="active" id="translator-link">Translator</a></li>
-                    <li><a href="#" id="practice-link">Practice</a></li>
                     <li><a href="#" id="settings-link">Settings</a></li>
                 </ul>
             </nav>
-            <div class="user-section"></div>
+            <div class="user-section">
+                <!-- Button removed as requested -->
+            </div>
         </header>
         
         <div class="main-content">
@@ -31,10 +32,7 @@
                         <div class="engine-option" data-engine="openai">OpenAI</div>
                         <div class="engine-option" data-engine="gemini">Google Gemini</div>
                     </div>
-                    <p class="engine-info">
-                        Use OpenAI or Google Gemini for higher quality translations and additional features. 
-                        Configure API keys in Settings.
-                    </p>
+                    <p class="engine-info">Use OpenAI or Google Gemini for higher quality translations and additional features. Configure API keys in Settings.</p>
                 </div>
                 
                 <div class="language-selector">
@@ -67,23 +65,18 @@
                 
                 <div class="text-areas">
                     <div class="text-box">
-                        <textarea id="source-text" placeholder="Type text to translate...">
-Hello, I would like to schedule a meeting to discuss the project. Are you available next week?
-                        </textarea>
+                        <textarea id="source-text" placeholder="Type text to translate...">Hello, I would like to schedule a meeting to discuss the project. Are you available next week?</textarea>
                         <div class="action-buttons">
                             <button class="secondary" id="clear-btn">Clear</button>
                         </div>
                     </div>
                     
                     <div class="text-box">
-                        <textarea id="target-text" readonly>
-Olá, gostaria de agendar uma reunião para discutir o projeto. Está disponível na próxima semana?
-                        </textarea>
+                        <textarea id="target-text" readonly>Olá, gostaria de agendar uma reunião para discutir o projeto. Está disponível na próxima semana?</textarea>
                         <div class="action-buttons">
                             <button class="secondary" id="copy-btn">Copy</button>
                             <button id="translate-btn">Translate</button>
-                            <button id="send-gmail-btn"   class="secondary" type="button" title="Compose in Gmail">📧 Gmail</button>
-                            <button id="send-outlook-btn" class="secondary" type="button" title="Compose in Outlook Web">📧 Outlook</button>
+                            <a id="send-email-btn" title="Send via Outlook" class="secondary" style="display:inline-block; text-decoration:none; color:inherit; padding:8px 16px; border-radius:8px; background-color:var(--light-color); border:none; cursor:pointer; font-weight:500; margin-left:4px;">📧</a>
                         </div>
                     </div>
                 </div>
@@ -116,7 +109,91 @@ Olá, gostaria de agendar uma reunião para discutir o projeto. Está disponíve
             </div>
             
             <div class="sidebar">
-                <div class="settings-panel" style="display:none;">
+                <div class="grammar-analysis">
+                    <h3 class="section-title">📝 Grammar Analysis</h3>
+                    
+                    <div class="llm-message">
+                        <h3>Advanced Grammar Analysis</h3>
+                        <p>Please activate your LLM Model in the settings to enable advanced grammar analysis with context examples.</p>
+                        <button id="activate-llm-btn" class="secondary">Go to Settings</button>
+                    </div>
+                </div>
+                
+                <div class="shadowing-tool">
+                    <h3 class="section-title">🔊 Shadowing Practice</h3>
+                    <div class="voice-engine-selector">
+                        <label for="voice-engine">Engine:</label>
+                        <select id="voice-engine">
+                            <option value="google">Google</option>
+                            <option value="whisper">Whisper (OpenAI)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="audio-controls">
+                        <button id="play-btn">▶️ Play</button>
+                        <select id="speed-select">
+                            <option>Speed: Normal</option>
+                            <option>Speed: Slow</option>
+                            <option>Speed: Very Slow</option>
+                        </select>
+                    </div>
+                    
+                    <div class="waveform">
+                        <div class="model-wave">
+                            <div class="wave-bar" style="height: 20%"></div>
+                            <div class="wave-bar" style="height: 40%"></div>
+                            <div class="wave-bar" style="height: 60%"></div>
+                            <div class="wave-bar" style="height: 80%"></div>
+                            <div class="wave-bar" style="height: 70%"></div>
+                            <div class="wave-bar" style="height: 50%"></div>
+                            <div class="wave-bar" style="height: 30%"></div>
+                            <div class="wave-bar" style="height: 20%"></div>
+                            <div class="wave-bar" style="height: 10%"></div>
+                            <div class="wave-bar" style="height: 20%"></div>
+                            <div class="wave-bar" style="height: 30%"></div>
+                            <div class="wave-bar" style="height: 40%"></div>
+                            <div class="wave-bar" style="height: 50%"></div>
+                            <div class="wave-bar" style="height: 60%"></div>
+                            <div class="wave-bar" style="height: 70%"></div>
+                            <div class="wave-bar" style="height: 60%"></div>
+                            <div class="wave-bar" style="height: 50%"></div>
+                            <div class="wave-bar" style="height: 40%"></div>
+                            <div class="wave-bar" style="height: 30%"></div>
+                            <div class="wave-bar" style="height: 20%"></div>
+                        </div>
+                        <div class="user-wave">
+                            <div class="wave-bar" style="height: 10%"></div>
+                            <div class="wave-bar" style="height: 20%"></div>
+                            <div class="wave-bar" style="height: 40%"></div>
+                            <div class="wave-bar" style="height: 60%"></div>
+                            <div class="wave-bar" style="height: 50%"></div>
+                            <div class="wave-bar" style="height: 30%"></div>
+                            <div class="wave-bar" style="height: 20%"></div>
+                            <div class="wave-bar" style="height: 10%"></div>
+                            <div class="wave-bar" style="height: 5%"></div>
+                            <div class="wave-bar" style="height: 10%"></div>
+                            <div class="wave-bar" style="height: 20%"></div>
+                            <div class="wave-bar" style="height: 30%"></div>
+                            <div class="wave-bar" style="height: 40%"></div>
+                            <div class="wave-bar" style="height: 50%"></div>
+                            <div class="wave-bar" style="height: 40%"></div>
+                            <div class="wave-bar" style="height: 30%"></div>
+                            <div class="wave-bar" style="height: 20%"></div>
+                            <div class="wave-bar" style="height: 10%"></div>
+                            <div class="wave-bar" style="height: 5%"></div>
+                            <div class="wave-bar" style="height: 10%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="record-btn" id="record-btn">🎙️</div>
+                    
+                    <p>Pronunciation accuracy:</p>
+                    <div class="accuracy-meter">
+                        <div class="accuracy-fill"></div>
+                    </div>
+                </div>
+                
+                <div class="settings-panel" style="display: none;">
                     <h3 class="section-title">⚙️ API Settings</h3>
                     
                     <div class="api-settings">
@@ -136,7 +213,9 @@ Olá, gostaria de agendar uma reunião para discutir o projeto. Está disponíve
             </div>
         </div>
         
-        <footer>LinguaIO © 2025 • Translate, Learn and Practice</footer>
+        <footer>
+            LinguaIO © 2025 • Translate, Learn and Practice
+        </footer>
     </div>
     
     <!-- Scripts -->
@@ -147,6 +226,4 @@ Olá, gostaria de agendar uma reunião para discutir o projeto. Está disponíve
     <script src="js/audio.js"></script>
     <script src="js/main.js"></script>
 </body>
-</html>
-
 </html>
