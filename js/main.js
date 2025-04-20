@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveSettingsBtn = document.getElementById('save-settings-btn');
     const logoHome = document.getElementById('logo-home');
     const translatorLink = document.getElementById('translator-link');
+    const sendEmailBtn = document.getElementById('send-email-btn');
 
     // Pop-up de explicação dos tons
     const toneInfoBtn = document.getElementById('tone-info-btn');
@@ -198,5 +199,12 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (savedOpenAIKey) document.getElementById('openai-key').value = savedOpenAIKey;
         if (savedGeminiKey) document.getElementById('gemini-key').value = savedGeminiKey;
+    }
+
+    if (sendEmailBtn && targetText) {
+        sendEmailBtn.addEventListener('click', () => {
+            const body = encodeURIComponent(targetText.value);
+            window.location.href = `mailto:?subject=Tradução%20LinguaIO&body=${body}`;
+        });
     }
 });
