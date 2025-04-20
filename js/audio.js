@@ -9,6 +9,7 @@ function initAudioSystem() {
     const speedSelect = document.getElementById('speed-select');
     const targetText = document.getElementById('target-text');
     const targetLanguage = document.getElementById('target-language');
+    const voiceEngineSelect = document.getElementById('voice-engine');
     
     // Estado do sistema de áudio
     let isRecording = false;
@@ -23,53 +24,71 @@ function initAudioSystem() {
     let utterance = new SpeechSynthesisUtterance();
     
     // Botão de reprodução
-    playBtn.addEventListener('click', () => {
-        if (synth.speaking) {
-            synth.cancel();
-            playBtn.textContent = '▶️ Reproduzir';
-            return;
-        }
-        
-        if (targetText.value) {
-            // Configurar enunciado
-            utterance.text = targetText.value;
-            
-            // Definir idioma baseado na seleção
-            const langMap = {
-                'en': 'en-US',
-                'pt': 'pt-BR',
-                'es': 'es-ES',
-                'fr': 'fr-FR',
-                'de': 'de-DE',
-                'it': 'it-IT'
-            };
-            
-            utterance.lang = langMap[targetLanguage.value] || 'en-US';
-            
-            // Definir velocidade baseada na seleção
-            const speedValue = speedSelect.value;
-            if (speedValue.includes('Lenta')) {
-                utterance.rate = 0.7;
-            } else if (speedValue.includes('Muito Lenta')) {
-                utterance.rate = 0.5;
-            } else {
-                utterance.rate = 1.0;
+    playBtn.addEventListener('click', async () => {
+        if (voiceEngineSelect.value === 'google') {
+            // Google Speech Synthesis (Web Speech API)
+            if (synth.speaking) {
+                synth.cancel();
+                playBtn.textContent = '▶️ Reproduzir';
+                return;
             }
-            
-            // Animar a forma de onda enquanto fala
-            animateWaveform('model-wave');
-            
-            // Alterar texto do botão
-            playBtn.textContent = '⏸️ Pausar';
-            
-            // Reproduzir áudio
-            synth.speak(utterance);
-            
-            // Restaurar botão quando terminar
-            utterance.onend = () => {
+            if (targetText.value) {
+                utterance.text = targetText.value;
+                const langMap = {
+                    'en': 'en-US',
+                    'pt': 'pt-BR',
+                    'es': 'es-ES',
+                    'fr': 'fr-FR',
+                    'de': 'de-DE',
+                    'it': 'it-IT'
+                };
+                utterance.lang = langMap[targetLanguage.value] || 'en-US';
+                const speedValue = speedSelect.value;
+                if (speedValue.includes('Lenta')) {
+                    utterance.rate = 0.7;
+                } else if (speedValue.includes('Muito Lenta')) {
+                    utterance.rate = 0.5;
+                } else {
+                    utterance.rate = 1.0;
+                }
+                animateWaveform('model-wave');
+                playBtn.textContent = '⏸️ Pausar';
+                synth.speak(utterance);
+                utterance.onend = () => {
+                    playBtn.textContent = '▶️ Reproduzir';
+                    stopWaveformAnimation('model-wave');
+                };
+            }
+        } else if (voiceEngineSelect.value === 'whisper') {
+            // Whisper (OpenAI) - síntese de voz via API
+            if (recordedAudio && !recordedAudio.paused) {
+                recordedAudio.pause();
                 playBtn.textContent = '▶️ Reproduzir';
                 stopWaveformAnimation('model-wave');
-            };
+                return;
+            }
+            if (targetText.value) {
+                playBtn.textContent = '⏳ Gerando áudio...';
+                animateWaveform('model-wave');
+                try {
+                    const audioUrl = await synthesizeWithWhisper(targetText.value, targetLanguage.value);
+                    if (recordedAudio) {
+                        recordedAudio.pause();
+                        recordedAudio = null;
+                    }
+                    recordedAudio = new Audio(audioUrl);
+                    recordedAudio.onended = () => {
+                        playBtn.textContent = '▶️ Reproduzir';
+                        stopWaveformAnimation('model-wave');
+                    };
+                    recordedAudio.play();
+                    playBtn.textContent = '⏸️ Pausar';
+                } catch (err) {
+                    playBtn.textContent = '▶️ Reproduzir';
+                    stopWaveformAnimation('model-wave');
+                    alert('Erro ao gerar áudio com Whisper: ' + err.message);
+                }
+            }
         }
     });
     
@@ -214,4 +233,44 @@ function initAudioSystem() {
     
     // Verificar suporte do navegador ao inicializar
     checkBrowserSupport();
+}
+
+// Função para síntese de voz com Whisper (OpenAI)
+async function synthesizeWithWhisper(text, lang) {
+    // Obter chave da API OpenAI
+    let apiKey = document.getElementById('openai-key')?.value || localStorage.getItem('openai-key');
+    if (!apiKey || apiKey === 'sk-********************') {
+        throw new Error('Configure uma chave OpenAI válida nas configurações.');
+    }
+    // Mapear código de idioma para nome
+    const langMap = {
+        'en': 'en',
+        'pt': 'pt',
+        'es': 'es',
+        'fr': 'fr',
+        'de': 'de',
+        'it': 'it'
+    };
+    const voiceLang = langMap[lang] || 'en';
+    // Chamada para API OpenAI TTS (Whisper)
+    const response = await fetch('https://api.openai.com/v1/audio/speech', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+            model: 'tts-1',
+            input: text,
+            voice: 'alloy', // Pode ser customizado
+            language: voiceLang,
+            response_format: 'mp3'
+        })
+    });
+    if (!response.ok) {
+        throw new Error('Erro na API Whisper: ' + response.statusText);
+    }
+    // Receber o blob de áudio
+    const blob = await response.blob();
+    return URL.createObjectURL(blob);
 }
