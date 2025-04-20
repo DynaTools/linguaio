@@ -34,6 +34,54 @@ function debounce(func, wait) {
     };
 }
 
+// Dicionário de traduções para a interface da gramática
+const grammarTranslations = {
+    'grammar_analysis': {
+        en: '📝 Grammar Analysis',
+        pt: '📝 Análise Gramatical',
+        es: '📝 Análisis Gramatical',
+        fr: '📝 Analyse Grammaticale',
+        de: '📝 Grammatik Analyse',
+        it: '📝 Analisi Grammaticale'
+    },
+    'advanced_grammar_analysis': {
+        en: 'Advanced Grammar Analysis',
+        pt: 'Análise Gramatical Avançada',
+        es: 'Análisis Gramatical Avanzado',
+        fr: 'Analyse Grammaticale Avancée',
+        de: 'Erweiterte Grammatik Analyse',
+        it: 'Analisi Grammaticale Avanzata'
+    },
+    'activate_llm': {
+        en: 'Please activate your LLM Model in the settings to enable advanced grammar analysis with context examples.',
+        pt: 'Ative seu modelo LLM nas configurações para habilitar análise gramatical avançada com exemplos de contexto.',
+        es: 'Active su modelo LLM en la configuración para habilitar el análisis gramatical avanzado con ejemplos de contexto.',
+        fr: 'Activez votre modèle LLM dans les paramètres pour activer l\'analyse grammaticale avancée avec des exemples de contexte.',
+        de: 'Aktivieren Sie Ihr LLM-Modell in den Einstellungen, um die erweiterte Grammatik-Analyse mit Kontextbeispielen zu aktivieren.',
+        it: 'Attiva il tuo modello LLM nelle impostazioni per abilitare l\'analisi grammaticale avanzata con esempi contestuali.'
+    },
+    'go_to_settings': {
+        en: 'Go to Settings',
+        pt: 'Ir para Configurações',
+        es: 'Ir a Configuración',
+        fr: 'Aller aux Paramètres',
+        de: 'Zu den Einstellungen',
+        it: 'Vai alle Impostazioni'
+    },
+    'context_examples': {
+        en: 'Context Examples:',
+        pt: 'Exemplos de Contexto:',
+        es: 'Ejemplos de Contexto:',
+        fr: 'Exemples de Contexte :',
+        de: 'Kontextbeispiele:',
+        it: 'Esempi di Contesto:'
+    }
+};
+
+function getGrammarTranslation(key, lang) {
+    return grammarTranslations[key]?.[lang] || grammarTranslations[key]?.en || key;
+}
+
 /**
  * Analisa o texto em busca de padrões gramaticais
  * Modificado para analisar o texto traduzido
@@ -52,8 +100,11 @@ function updateGrammarAnalysis() {
     const grammarSection = document.querySelector('.grammar-analysis');
     
     // Limpar análises existentes (exceto título)
-    const sectionTitle = grammarSection.querySelector('.section-title');
     grammarSection.innerHTML = '';
+    // Adicionar título traduzido
+    const sectionTitle = document.createElement('h3');
+    sectionTitle.className = 'section-title';
+    sectionTitle.textContent = getGrammarTranslation('grammar_analysis', targetLang);
     grammarSection.appendChild(sectionTitle);
     
     // Determine which API to use based on the selected engine
@@ -143,15 +194,14 @@ function updateGrammarAnalysis() {
  */
 function addActivateLLMMessage() {
     const grammarSection = document.querySelector('.grammar-analysis');
-    
+    const targetLang = document.getElementById('target-language').value;
     const messageDiv = document.createElement('div');
     messageDiv.className = 'llm-message';
     messageDiv.innerHTML = `
-        <h3>Advanced Grammar Analysis</h3>
-        <p>Please activate your LLM Model in the settings to enable advanced grammar analysis with context examples.</p>
-        <button id="activate-llm-btn" class="secondary">Go to Settings</button>
+        <h3>${getGrammarTranslation('advanced_grammar_analysis', targetLang)}</h3>
+        <p>${getGrammarTranslation('activate_llm', targetLang)}</p>
+        <button id="activate-llm-btn" class="secondary">${getGrammarTranslation('go_to_settings', targetLang)}</button>
     `;
-    
     grammarSection.appendChild(messageDiv);
     
     // Add event listener to the button
@@ -352,18 +402,15 @@ async function analyzeGrammarWithGemini(text, lang) {
  */
 function addVerbTenseAnalysis(tenseName, explanation, examples = []) {
     const grammarSection = document.querySelector('.grammar-analysis');
-    
+    const targetLang = document.getElementById('target-language').value;
     const verbTense = document.createElement('div');
     verbTense.className = 'verb-tense';
-    
     const tenseNameEl = document.createElement('div');
     tenseNameEl.className = 'tense-name';
     tenseNameEl.textContent = tenseName;
-    
     const explanationEl = document.createElement('div');
     explanationEl.className = 'tense-explanation';
     explanationEl.textContent = explanation;
-    
     verbTense.appendChild(tenseNameEl);
     verbTense.appendChild(explanationEl);
     
@@ -374,7 +421,7 @@ function addVerbTenseAnalysis(tenseName, explanation, examples = []) {
         
         const contextTitle = document.createElement('div');
         contextTitle.className = 'context-title';
-        contextTitle.textContent = 'Context Examples:';
+        contextTitle.textContent = getGrammarTranslation('context_examples', targetLang);
         
         const examplesList = document.createElement('ul');
         examples.forEach(example => {
