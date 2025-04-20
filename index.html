@@ -81,7 +81,19 @@
                 </div>
                 
                 <div class="tone-adjuster">
-                    <h3>Adjust Tone:</h3>
+                    <h3>Adjust Tone:
+                        <span id="tone-info-btn" style="cursor:pointer; margin-left:8px; font-size:18px;" title="What do the tones mean?">ℹ️</span>
+                    </h3>
+                    <div id="tone-info-popup" class="tone-info-popup" style="display:none; position:absolute; z-index:1000; background:#fff; border:1px solid #ccc; border-radius:8px; padding:16px; box-shadow:0 4px 16px rgba(0,0,0,0.15); max-width:320px;">
+                        <strong>Tone meanings:</strong>
+                        <ul style="margin-top:8px;">
+                            <li><b>Neutral</b>: Objective, direct, and without emotional coloring.</li>
+                            <li><b>Casual</b>: Informal, relaxed, and conversational.</li>
+                            <li><b>Formal</b>: Polite, professional, and uses standard language.</li>
+                            <li><b>Professional</b>: Business-appropriate, technical, and precise.</li>
+                            <li><b>Friendly</b>: Warm, approachable, and positive.</li>
+                        </ul>
+                    </div>
                     <div class="tone-options">
                         <div class="tone-option">Neutral</div>
                         <div class="tone-option active">Casual</div>

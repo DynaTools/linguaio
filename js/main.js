@@ -17,6 +17,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoHome = document.getElementById('logo-home');
     const translatorLink = document.getElementById('translator-link');
 
+    // Pop-up de explicação dos tons
+    const toneInfoBtn = document.getElementById('tone-info-btn');
+    const toneInfoPopup = document.getElementById('tone-info-popup');
+    if (toneInfoBtn && toneInfoPopup) {
+        toneInfoBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (toneInfoPopup.style.display === 'none' || !toneInfoPopup.style.display) {
+                // Posicionar popup próximo ao botão
+                const rect = toneInfoBtn.getBoundingClientRect();
+                toneInfoPopup.style.top = (rect.bottom + window.scrollY + 8) + 'px';
+                toneInfoPopup.style.left = (rect.left + window.scrollX - 40) + 'px';
+                toneInfoPopup.style.display = 'block';
+            } else {
+                toneInfoPopup.style.display = 'none';
+            }
+        });
+        // Fechar popup ao clicar fora
+        document.addEventListener('click', (e) => {
+            if (toneInfoPopup.style.display === 'block' && !toneInfoPopup.contains(e.target) && e.target !== toneInfoBtn) {
+                toneInfoPopup.style.display = 'none';
+            }
+        });
+    }
+
     // Inicializar os diferentes módulos
     initUIControls();
     initTranslationSystem();
