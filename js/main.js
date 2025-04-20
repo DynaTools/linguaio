@@ -201,16 +201,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (savedGeminiKey) document.getElementById('gemini-key').value = savedGeminiKey;
     }
 
+    function updateEmailHref() {
+        if (sendEmailBtn && targetText) {
+            const body = encodeURIComponent(targetText.value);
+            sendEmailBtn.setAttribute('href', `mailto:?subject=Tradução%20LinguaIO&body=${body}`);
+        }
+    }
     if (sendEmailBtn && targetText) {
-        sendEmailBtn.addEventListener('click', (e) => {
-            const body = encodeURIComponent(targetText.value);
-            sendEmailBtn.setAttribute('href', `mailto:?subject=Tradução%20LinguaIO&body=${body}`);
-            // Não previne o default, deixa o navegador abrir o link
-        });
-        // Atualiza o href ao passar o mouse também
-        sendEmailBtn.addEventListener('mouseover', () => {
-            const body = encodeURIComponent(targetText.value);
-            sendEmailBtn.setAttribute('href', `mailto:?subject=Tradução%20LinguaIO&body=${body}`);
-        });
+        // Atualiza o href ao passar o mouse e ao clicar
+        sendEmailBtn.addEventListener('mouseover', updateEmailHref);
+        sendEmailBtn.addEventListener('click', updateEmailHref);
+        // Atualiza o href sempre que o texto traduzido mudar
+        targetText.addEventListener('input', updateEmailHref);
+        // Atualiza inicialmente
+        updateEmailHref();
     }
 });
