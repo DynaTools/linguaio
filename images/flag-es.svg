@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20">
+  <!-- Bandeira da Espanha -->
+  <rect width="30" height="20" fill="#c60b1e"/>
+  <rect width="30" height="10" y="5" fill="#ffc400"/>
+  <rect width="4" height="6" x="7" y="7" fill="#c60b1e"/>
+</svg>

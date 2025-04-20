@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20">
+  <!-- Bandeira do Brasil -->
+  <rect width="30" height="20" fill="#009c3b"/>
+  <path d="M15,2 L27,10 L15,18 L3,10 L15,2z" fill="#ffdf00"/>
+  <circle cx="15" cy="10" r="4.5" fill="#002776"/>
+  <path d="M15,14.5 C12.515,14.5 10.5,12.485 10.5,10 C10.5,7.515 12.515,5.5 15,5.5 C15.879,5.5 16.71,5.762 17.413,6.237" stroke="#fff" stroke-width="0.75" fill="none"/>
+</svg>
